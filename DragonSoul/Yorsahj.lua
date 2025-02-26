@@ -6,6 +6,7 @@ local mod = BigWigs:NewBoss("Yor'sahj the Unsleeping", 967, 325)
 if not mod then return end
 mod:RegisterEnableMob(55312)
 mod:SetEncounterID(1295)
+mod:SetRespawnTime(35)
 
 --------------------------------------------------------------------------------
 -- Localization
