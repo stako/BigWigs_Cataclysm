@@ -8,7 +8,7 @@ mod:RegisterEnableMob(55265)
 mod:SetEncounterID(1292)
 mod:SetRespawnTime(32)
 
-local stompCount = 1
+local stompCount, hasStomped = 1, false
 
 --------------------------------------------------------------------------------
 -- Localization
@@ -75,7 +75,7 @@ function mod:OnEngage()
 	self:Berserk(420) -- confirmed
 	self:Bar("stomp_boss", 11, L["stomp_boss"], L["stomp_boss_icon"])
 	self:CDBar(103851, 56, L["blood"])
-	stompCount = 1
+	stompCount, hasStomped = 1, false
 end
 
 --------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ end
 --
 
 function mod:SummonKohcrom(args)
-	self:CDBar("stomp_boss", 6, CL.other:format(self:SpellName(103414), self.displayName), L["stomp_boss_icon"]) -- Stomp, 6-12s
+	self:CDBar("stomp_boss", hasStomped and 13 or 6.4, CL.other:format(self:SpellName(103414), self.displayName), L["stomp_boss_icon"]) -- Stomp
 	self:MessageOld(args.spellId, "green")
 	self:StopBar(L["stomp_boss"])
 end
@@ -92,11 +92,11 @@ end
 function mod:BloodOver(_, _, _, spellId)
 	if spellId == 103851 then
 		self:Bar(spellId, 75, L["blood"])
-		stompCount = 1
+		stompCount = 0
 		if self:Heroic() then
-			self:CDBar("stomp_boss", 15, CL.other:format(self:SpellName(103414), self.displayName), L["stomp_boss_icon"]) -- Stomp
+			self:CDBar("stomp_boss", 18.5, CL.other:format(self:SpellName(103414), self.displayName), L["stomp_boss_icon"]) -- Stomp
 		else
-			self:Bar("stomp_boss", 5, L["stomp_boss"], L["stomp_boss_icon"])
+			self:CDBar("stomp_boss", 18.5, L["stomp_boss"], L["stomp_boss_icon"])
 		end
 	end
 end
@@ -107,20 +107,25 @@ function mod:Stomp(args)
 			self:MessageOld("stomp_add", "red", nil, CL.other:format(args.spellName, self:SpellName(-4262)), args.spellId) -- "Stomp: Kohcrom"
 			self:StopBar(CL.other:format(args.spellName, self:SpellName(-4262))) -- "Stomp: Kohcrom"
 		else -- Since we trigger bars off morchok casts, we gotta make sure kohcrom isn't caster to avoid bad timers.
-			self:CDBar("stomp_add", self:Difficulty() == 5 and 6 or 5, CL.other:format(args.spellName, self:SpellName(-4262)), args.spellId) -- "Stomp: Kohcrom" 6sec after on 10 man hc, 5 sec on 25
+			if hasStomped then
+				self:CDBar("stomp_add", self:Difficulty() == 5 and 6.4 or 5, CL.other:format(args.spellName, self:SpellName(-4262)), args.spellId) -- "Stomp: Kohcrom" 6sec after on 10 man hc, 5 sec on 25
+			end
 			self:MessageOld("stomp_boss", "red", nil, CL.other:format(args.spellName, self.displayName), args.spellId) -- "Stomp: Morchok"
 			if stompCount < 4 then
-				self:CDBar("stomp_boss", 12, CL.other:format(args.spellName, self.displayName), args.spellId) -- "Stomp: Morchok"
+				self:CDBar("stomp_boss", 13, CL.other:format(args.spellName, self.displayName), args.spellId) -- "Stomp: Morchok"
 			else
 				self:StopBar(CL.other:format(args.spellName, self.displayName)) -- "Stomp: Morchok"
 			end
 			stompCount = stompCount + 1
+			hasStomped = true
 		end
 	else -- Not heroic, or Kohcrom isn't out yet, just do normal bar.
 		if stompCount < 4 then
-			self:CDBar("stomp_boss", 12, args.spellId)
+			self:CDBar("stomp_boss", 12.5, args.spellId)
 			self:MessageOld("stomp_boss", "red", nil, args.spellId)
 			stompCount = stompCount + 1
+		else
+			self:StopBar(args.spellId)
 		end
 	end
 end
