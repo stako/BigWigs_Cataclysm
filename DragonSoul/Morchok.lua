@@ -138,6 +138,7 @@ do
 	function mod:BlackBlood(args)
 		local t = GetTime()
 		if t-prev > 5 then
+			self:StopBar(L["blood"]) -- Black Blood
 			prev = t
 			self:MessageOld(args.spellId, "blue", "long") -- not really personal, but we tend to associate personal with fns
 			self:Bar(args.spellId, 17, CL["cast"]:format(L["blood"]))
